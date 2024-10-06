@@ -1,31 +1,40 @@
 def calculateTotalRegion(heights):
     n = len(heights)
     
-    # Arrays to store how far we can go left and right
+    # Arrays to store the farthest left and right boundary for each student
     left = [0] * n
     right = [0] * n
     
-    # Calculate left array
+    # Monotonic stack for the left boundaries
+    stack = []
     for i in range(n):
-        if i == 0:
-            left[i] = 1
-        elif heights[i] >= heights[i - 1]:
-            left[i] = left[i - 1] + 1
+        # Find the farthest left where height is greater than or equal to current height
+        while stack and heights[stack[-1]] < heights[i]:
+            stack.pop()
+        if stack:
+            left[i] = stack[-1] + 1
         else:
-            left[i] = 1
+            left[i] = 0  # No taller element on the left
+        stack.append(i)
     
-    # Calculate right array
-    for i in range(n - 1, -1, -1):
-        if i == n - 1:
-            right[i] = 1
-        elif heights[i] >= heights[i + 1]:
-            right[i] = right[i + 1] + 1
+    # Clear the stack for the right boundary calculation
+    stack.clear()
+    
+    # Monotonic stack for the right boundaries
+    for i in range(n-1, -1, -1):
+        # Find the farthest right where height is greater than or equal to current height
+        while stack and heights[stack[-1]] < heights[i]:
+            stack.pop()
+        if stack:
+            right[i] = stack[-1] - 1
         else:
-            right[i] = 1
+            right[i] = n - 1  # No taller element on the right
+        stack.append(i)
     
     # Calculate the total sum of all regions
     total_sum = 0
     for i in range(n):
-        total_sum += left[i] + right[i] - 1  # Subtract 1 to avoid double counting
+        region_length = right[i] - left[i] + 1
+        total_sum += region_length
     
     return total_sum
